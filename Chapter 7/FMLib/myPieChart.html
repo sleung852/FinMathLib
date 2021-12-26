@@ -1,0 +1,36 @@
+<html>
+<head>
+<!--Load the AJAX API-->
+<script type="text/javascript"src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1.0', {'packages':['corechart']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+var data=new google.visualization.DataTable();
+data.addColumn('string', 'Label');
+data.addColumn('number', 'Value');
+data.addRows([
+['A Label 0', 0],
+['A Label 1', 1],
+['A Label 2', 2],
+['A Label 3', 3],
+['A Label 4', 4],
+['A Label 5', 5],
+['A Label 6', 6],
+['A Label 7', 7],
+['A Label 8', 8],
+['A Label 9', 9]
+]);
+var options = {'title':'A Pie Chart',
+'width':400,
+'height':300
+};
+var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+}
+</script>
+</head>
+<body>
+<div id='chart_div'>
+</body>
+</html>
