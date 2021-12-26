@@ -22,6 +22,17 @@ vector<double> BlackScholesModel::
     return generatePricePath(
 	    toDate, nSteps, riskFreeRate );
 }
+
+vector<double> BlackScholesModel::
+    generateRiskNeutralPricePath(
+        double toDate,
+        int nSteps,
+        double h) const {
+    return generatePricePath(
+	    toDate, nSteps, riskFreeRate, h);
+}
+
+
 /**
  *  Creates a price path according to the model parameters
  */
@@ -30,7 +41,6 @@ vector<double> BlackScholesModel::generatePricePath(
         int nSteps ) const {
     return generatePricePath(toDate, nSteps, drift );
 }
-
 
 /**
  *  Creates a price path according to the model parameters
@@ -45,6 +55,26 @@ vector<double> BlackScholesModel::generatePricePath(
     double a = (drift-volatility*volatility*0.5)*dt;
     double b = volatility*sqrt(dt);
     double currentLogS = log( stockPrice );
+    for (int i=0; i<nSteps; i++) {
+        double dLogS = a + b*epsilon[i];
+        double logS = currentLogS + dLogS;
+        path[i] = exp( logS );
+        currentLogS = logS;
+    }
+    return path;
+}
+
+vector<double> BlackScholesModel::generatePricePath(
+        double toDate,
+        int nSteps,
+        double drift,
+        double h) const {
+    vector<double> path(nSteps,0.0);
+    vector<double> epsilon = randn( nSteps );
+    double dt = (toDate-date)/nSteps;
+    double a = (drift-volatility*volatility*0.5)*dt;
+    double b = volatility*sqrt(dt);
+    double currentLogS = log( stockPrice * (1+h) );
     for (int i=0; i<nSteps; i++) {
         double dLogS = a + b*epsilon[i];
         double logS = currentLogS + dLogS;

@@ -18,11 +18,23 @@ public:
     std::vector<double> generateRiskNeutralPricePath(
                             double toDate,
                             int nSteps) const;
+
+    std::vector<double> generateRiskNeutralPricePath(
+                            double toDate,
+                            int nSteps,
+                            double h) const;
+
 private:
     std::vector<double> generatePricePath(
                             double toDate,
                             int nSteps,
                             double drift) const;
+
+    std::vector<double> generatePricePath(
+                            double toDate,
+                            int nSteps,
+                            double drift,
+                            double h) const;
 };
 
 

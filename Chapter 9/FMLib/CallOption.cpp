@@ -31,6 +31,20 @@ double CallOption::price(
     return S*normcdf(d1) - exp(-r*T)*K*normcdf(d2);
 }
 
+double CallOption::delta( 
+        const BlackScholesModel& bsm ) const {
+    double S = bsm.stockPrice;
+    double K = strike;
+    double sigma = bsm.volatility;
+    double r = bsm.riskFreeRate;
+    double T = maturity - bsm.date;
+
+    double numerator = log( S/K ) + ( r + sigma*sigma*0.5)*T;
+    double denominator = sigma * sqrt(T );
+    double d1 = numerator/denominator;
+    return exp(-r*T)*normcdf(d1);
+}
+
 
 
 
