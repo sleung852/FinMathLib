@@ -24,6 +24,10 @@ public:
                             int nSteps,
                             double h) const;
 
+    std::vector<double> generateRiskNeutralPricePathAntithetic(
+                            double toDate,
+                            int nSteps) const;
+
 private:
     std::vector<double> generatePricePath(
                             double toDate,
@@ -35,6 +39,11 @@ private:
                             int nSteps,
                             double drift,
                             double h) const;
+
+    std::vector<double> generatePricePathAntithetic(
+                            double toDate,
+                            int nSteps,
+                            double drift) const;
 };
 
 

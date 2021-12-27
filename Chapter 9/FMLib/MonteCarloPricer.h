@@ -44,6 +44,10 @@ public:
     std::vector<double> confidenceInterval( const UpAndOutOption& option,
                             const BlackScholesModel& model );
 
+    /*  Price a call option with Antithetic */
+    double priceAntithetic( const CallOption& option,
+                            const BlackScholesModel& model );
+
 };
 
 void testMonteCarloPricer();
