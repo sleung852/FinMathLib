@@ -8,11 +8,14 @@
 #include "BlackScholesModel.h"
 #include "Histogram.h"
 #include "MonteCarloPricer.h"
+#include "NormalPDF.h"
+#include "RectangleRulePricer.h"
 
 using namespace std;
 
 
 int main() {
+    // test functions
     testMatlib();
     testGeometry();
     testPieChart();
@@ -23,5 +26,7 @@ int main() {
     testTextFunctions();
     testHistogram();
     testMonteCarloPricer();
+    testNormPDF();
+    testRectangleRulePricer();
     return 0;
 }

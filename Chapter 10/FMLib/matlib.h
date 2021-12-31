@@ -55,11 +55,22 @@ double integral( RealFunction& f,
                  double b,
                  int nSteps );
 
+/* Integral from x to infinity */
+double integralToInfinity( RealFunction& f,
+                    double x,
+                    int nSteps);
+
+double integralFromInfinity( RealFunction& f,
+                    double x,
+                    int nSteps);
 
 
+double differentiateNumerically( RealFunction& f,
+                    double x,
+                    double h = 1e-10);
 
-
-
+double integralFromInfinityToInfinity(RealFunction& f,
+							int nPoints);
 
 
 /**

@@ -1,0 +1,60 @@
+<html>
+<head>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1.0', {'packages':['corechart']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+var data = google.visualization.arrayToDataTable([
+['x values','y values'],
+[0.00153751, 0],
+[0.00153751, 115],
+[0.101381, 115],
+[0.101381, 0],
+[0.101381, 0],
+[0.101381, 97],
+[0.201224, 97],
+[0.201224, 0],
+[0.201224, 0],
+[0.201224, 87],
+[0.301067, 87],
+[0.301067, 0],
+[0.301067, 0],
+[0.301067, 100],
+[0.400911, 100],
+[0.400911, 0],
+[0.400911, 0],
+[0.400911, 95],
+[0.500754, 95],
+[0.500754, 0],
+[0.500754, 0],
+[0.500754, 105],
+[0.600597, 105],
+[0.600597, 0],
+[0.600597, 0],
+[0.600597, 93],
+[0.700441, 93],
+[0.700441, 0],
+[0.700441, 0],
+[0.700441, 103],
+[0.800284, 103],
+[0.800284, 0],
+[0.800284, 0],
+[0.800284, 104],
+[0.900127, 104],
+[0.900127, 0],
+[0.900127, 0],
+[0.900127, 101],
+[0.999971, 101],
+[0.999971, 0]
+]);
+var options = {title: 'Uniform distribution', 'width':800, 'height':800};
+var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+}
+</script>
+</head>
+<body>
+<div id='chart_div'>
+</body>
+</html>

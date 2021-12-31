@@ -3,6 +3,8 @@
 #include "matlib.h"
 #include "CallOption.h"
 #include "PutOption.h"
+#include "KnockOutCallOption.h"
+
 using namespace std;
 
 MonteCarloPricer::MonteCarloPricer() :
@@ -20,6 +22,24 @@ double MonteCarloPricer::price(
                 1 );
         double stockPrice = path.back();
         double payoff = option.payoff( stockPrice );
+        total+= payoff;
+    }
+    double mean = total/nScenarios;
+    double r = model.riskFreeRate;
+    double T = option.getMaturity() - model.date;
+    return exp(-r*T)*mean;
+}
+
+double MonteCarloPricer::price(
+        const ContinuousTimeOption& option,
+        const BlackScholesModel& model ) {
+    double total = 0.0;
+    for (int i=0; i<nScenarios; i++) {
+        vector<double> path= model.
+            generateRiskNeutralPricePath(
+                option.getMaturity(),
+                1 );
+        double payoff = option.payoff( path );
         total+= payoff;
     }
     double mean = total/nScenarios;
@@ -79,7 +99,32 @@ static void testPutAndCall() {
 	ASSERT_APPROX_EQUAL(priceP, p.price(m), 0.1);
 }
 
+static void testKnock() {
+	rng("default");
+
+	BlackScholesModel m;
+	m.volatility = 0.1;
+	m.riskFreeRate = 0.05;
+	m.stockPrice = 100.0;
+	m.drift = 0.1;
+
+	CallOption c;
+	c.strike = 90;
+	c.maturity = 2;
+
+	KnockOutCallOption kc;
+	kc.strike = 90;
+	kc.maturity = 2;
+    kc.barrier = 80;
+
+	// test Knock Call must be cheaper than Call
+	MonteCarloPricer pricer;
+	double price = pricer.price(kc, m);
+	ASSERT( c.price(m) >= price );
+}
+
 void testMonteCarloPricer() {
     testPriceCallOption();
 	testPutAndCall();
+    testKnock();
 }

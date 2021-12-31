@@ -4,6 +4,8 @@
 #include "LineChart.h"
 #include "Histogram.h"
 #include "CallOption.h"
+#include "NormalPDF.h"
+#include "testing.h"
 
 using namespace std;
 
@@ -308,6 +310,100 @@ double integral( RealFunction& f,
     return h*total;
 }
 
+// 10.6.3
+// integral from -inf to +inf
+// static double sigmoidFunction(double x) {
+//     return 1/(1+exp(-x));
+// }
+
+// double integralToInfinity( RealFunction& f,
+//                         double x,
+//                         int nPoints) {
+
+//     class SigmoidInfusedFunction : public RealFunction {
+//         public:
+//             SigmoidInfusedFunction(RealFunction& f) :
+//                 f(f) {
+//             }
+
+//             RealFunction &f;
+//             double evaluate(double x) {
+//                 // d(sig)/dx = 2 * exp(-x) / pow(1+exp(-x),2)
+//                 return f.evaluate(sigmoidFunction(x)) * 2 * exp(-x) / pow(1+exp(-x),2);
+//             }
+//     };
+//     SigmoidInfusedFunction sigmoidInfusedFunc(f);
+//     return integral(sigmoidInfusedFunc, sigmoidFunction(x), 1, 1000);
+// }
+
+double integralToInfinity(RealFunction& f,
+							double x,
+							int nPoints) {
+	class Integrand : public RealFunction {
+	public:
+		double x;
+		RealFunction& f;
+
+		double evaluate(double s) {
+			return 1 / (s*s)*f.evaluate(1 / s + x - 1);
+		}
+
+		Integrand(double x, RealFunction& f) : x(x), f(f)
+		{}
+	};
+
+	Integrand i(x, f);
+	return integral(i, 0, 1, nPoints);
+}
+
+double integralFromInfinity(RealFunction& f,
+							double x,
+							int nPoints) {
+	class Integrand : public RealFunction {
+	public:
+		RealFunction& f;
+
+		double evaluate(double x) {
+			return f.evaluate(-x);
+		}
+
+		Integrand(RealFunction& f) : f(f)
+		{}
+	};
+
+	Integrand i(f);
+	return integralToInfinity(i, -x, nPoints);
+}
+
+double integralFromInfinityToInfinity(RealFunction& f,
+							int nPoints) {
+    return integralFromInfinity(f, 0, nPoints) + integralToInfinity(f, 0, nPoints);
+                            }
+
+// double integralToInfinity( RealFunction& f,
+//                         int nPoints) {
+
+//     class xm1Function : public RealFunction {
+//         public:
+//             xm1Function(RealFunction& f) :
+//                 f(f) {
+//             }
+
+//             RealFunction &f;
+
+//             double evaluate(double x) {
+//                 return f.evaluate(1/x) * (x*x);
+//             }
+//     };
+//     xm1Function subFunc(f);
+//     return integral(f, 0, 1, nPoints) + integral(subFunc, 0, 1, nPoints);
+// }
+
+
+// 10.6.5
+double differentiateNumerically(RealFunction& f, double x, double h) {
+    return (f.evaluate(x+h) - f.evaluate(x)) / (h);
+}
 
 ///////////////////////////////////////////////
 //
@@ -456,6 +552,32 @@ static void testIntegratePayoff() {
 }
 
 
+// 10.6.4
+static void testIntegralVersion3() {
+    NormPDF normPDF;
+    // stringstream ss;
+    // ss << "Expected Value: 1\n";
+    // ss << "Result: " << integralToInfinity(normPDF, 1000) << "\n";
+    // DEBUG_PRINT(ss.str());
+    ASSERT_APPROX_EQUAL(integralToInfinity(normPDF, 0, 1000), 0.5, 0.01);
+    ASSERT_APPROX_EQUAL(integralFromInfinity(normPDF, -1.96, 1000), 0.025, 0.005);
+    ASSERT_APPROX_EQUAL(integralFromInfinityToInfinity(normPDF, 1000), 1, 0.01);
+}
+
+// 10.6.5
+static void testDifferentiateNumerically() {
+
+    class XSquared : public RealFunction {
+        public:
+            double evaluate(double x) {
+                return x*x;
+            }
+    };
+    XSquared xs;
+    ASSERT_APPROX_EQUAL(differentiateNumerically(xs, 10), 20, 0.01);
+}
+
+
 void testMatlib() {
     TEST( testLinspace );
     TEST( testMean );
@@ -469,5 +591,9 @@ void testMatlib() {
     TEST( testPrctile );
     TEST( testIntegral );
     TEST( testIntegralVersion2 );
-	TEST(testIntegratePayoff);
+	TEST( testIntegratePayoff );
+    setDebugEnabled(true);
+    TEST ( testIntegralVersion3 );
+    setDebugEnabled(false);
+    TEST ( testDifferentiateNumerically );
 }

@@ -153,8 +153,6 @@ static void testPieChartClass() {
     pieChart.writeAsHTML( "PizzaPie.html" );
 }
 
-
-
 void testPieChart() {
     TEST( testPieChartData );
     TEST( testPieChartClass );
