@@ -1,9 +1,11 @@
 #include "Portfolio.h"
 #include "CallOption.h"
 #include "PutOption.h"
-#include "UpAndOutOption.h"
 #include "UpAndInOption.h"
-#include <memory>
+#include "UpAndOutOption.h"
+#include "ZeroCouponBond.h"
+#include "Stock.h"
+#include "BlackScholesModel.h"
 
 using namespace std;
 
@@ -15,18 +17,18 @@ using namespace std;
  */
 class PortfolioImpl : public Portfolio {
 public:
-    /* Returns the number of items in the portfolio*/
+    /*  Returns the number of items in the portflio */
     int size() const;    
-    /*  Add a new security to the portfolio,
-		returns the index at which it was added */
+    /*  Add a new security to the portfolio, returns the index
+        at which it was added */
     int add( double quantity,
              shared_ptr<Priceable> security );
     /*  Update the quantity at a given index */
     void setQuantity( int index, double quantity );
     /*  Compute the current price */
-    double price(
-	    const BlackScholesModel& model ) const;    
+    double price( const StockPriceModel& model ) const;    
 
+//private:
     vector<double> quantities;
     vector< shared_ptr<Priceable> > securities;
 };
@@ -43,15 +45,15 @@ int PortfolioImpl::add( double quantity,
 }
 
 double PortfolioImpl::price(
-        const BlackScholesModel& model ) const {
+        const StockPriceModel& model ) const {
     double ret = 0;
     int n = size();
     for (int i=0; i<n; i++) {
-        ret += quantities[i]
-               * securities[i]->price( model );
+        ret += quantities[i] * securities[i]->price( model );
     }
     return ret;
 }
+
 void PortfolioImpl::setQuantity( int index,
         double quantity ) {
     quantities[index] = quantity;
@@ -61,10 +63,10 @@ void PortfolioImpl::setQuantity( int index,
  *   Create a Portfolio
  */
 shared_ptr<Portfolio> Portfolio::newInstance() {
-    shared_ptr<Portfolio> ret=
-    	make_shared<PortfolioImpl>();
+    shared_ptr<Portfolio> ret=make_shared<PortfolioImpl>();
     return ret;
 }
+
 
 /////////////////////////////
 //  Tests
@@ -80,8 +82,8 @@ static void testSingleSecurity() {
     portfolio->add( 100, c );
 
     BlackScholesModel bsm;
-    bsm.volatility = 0.1;
-    bsm.stockPrice = 100;
+    bsm.setVolatility(0.1);
+    bsm.setStockPrice(100);
     
     double unitPrice = c->price( bsm );
     double portfolioPrice = portfolio->price( bsm );
@@ -92,8 +94,7 @@ static void testPutCallParity() {
     shared_ptr<Portfolio> portfolio
         = Portfolio::newInstance();
     
-    shared_ptr<CallOption> c
-    	=make_shared<CallOption>();
+    shared_ptr<CallOption> c=make_shared<CallOption>();
     c->setStrike(110);
     c->setMaturity(1.0);
 
@@ -101,62 +102,83 @@ static void testPutCallParity() {
     p->setStrike(110);
     p->setMaturity(1.0);
 
+
     portfolio->add( 100, c );
     portfolio->add( -100, p );
 
     BlackScholesModel bsm;
-    bsm.volatility = 0.1;
-    bsm.stockPrice = 100;
-    bsm.riskFreeRate = 0;
+    bsm.setVolatility(0.1);
+    bsm.setStockPrice(100);
+    bsm.setRiskFreeRate(0);
 
-    double expected =bsm.stockPrice - c->getStrike();
+    double expected = bsm.getStockPrice() - c->getStrike();
     double portfolioPrice = portfolio->price( bsm );
     
-    ASSERT_APPROX_EQUAL(100*expected,
-	    portfolioPrice,0.0001);
+    ASSERT_APPROX_EQUAL(100*expected,portfolioPrice,0.0001);
+
 }
 
-static void testKnockOutOptionsAndCallOptions() {
+static void testStocksAndBonds() {
 
-    shared_ptr<Portfolio> portfolioA = Portfolio::newInstance();
+	shared_ptr<Stock> stock = make_shared<Stock>();
+	shared_ptr<ZeroCouponBond> bond = make_shared<ZeroCouponBond>();
+	bond->maturity = 1.0;
 
-    shared_ptr<UpAndOutOption> upAndOutOption = make_shared<UpAndOutOption>();
-    upAndOutOption->setBarrier(110);
-    upAndOutOption->setStrike(120);
-    upAndOutOption->setMaturity(2);
+	shared_ptr<Portfolio> portfolio
+		= Portfolio::newInstance();
+	portfolio->add(1, stock);
+	portfolio->add(1, bond);
+	
+	BlackScholesModel bsm;
+	bsm.setVolatility(0.1);
+	bsm.setStockPrice(100);
+	bsm.setRiskFreeRate(0);
 
-    shared_ptr<UpAndInOption> upAndInOption = make_shared<UpAndInOption>();
-    upAndInOption->setBarrier(110);
-    upAndInOption->setMaturity(2);
-    upAndInOption->setStrike(120);
+	double portfolioPrice = portfolio->price(bsm);
 
-    portfolioA->add(100, upAndOutOption);
-    portfolioA->add(100, upAndInOption);
+	ASSERT_APPROX_EQUAL(101.0, portfolioPrice, 0.0001);
 
-    shared_ptr<Portfolio> portfolioB = Portfolio::newInstance();
-
-    shared_ptr<CallOption> callOption = make_shared<CallOption>();
-    callOption->setMaturity(2);
-    callOption->setStrike(120);
-
-    portfolioB->add(100, callOption);
-
-    BlackScholesModel bsm;
-    bsm.date = 1.0;
-    bsm.volatility = 0.1;
-    bsm.riskFreeRate = 0.05;
-    bsm.stockPrice = 100.0;
-
-    double portfolioAPrice = portfolioA->price(bsm);
-    double portfolioBPrice = portfolioB->price(bsm);
-
-    // not very accurate though
-    ASSERT_APPROX_EQUAL(portfolioAPrice, portfolioBPrice, 1);
 }
+
+static void testBarrierOptions() {
+
+	double strike = 100;
+	double barrier = 105;
+	double maturity = 1.0;
+	shared_ptr<UpAndOutOption> upAndOut = make_shared<UpAndOutOption>();
+	shared_ptr<UpAndInOption> upAndIn = make_shared<UpAndInOption>();
+	shared_ptr<CallOption> option = make_shared<CallOption>();
+	option->setStrike(strike);
+	upAndOut->setStrike(strike);
+	upAndOut->setBarrier(barrier);
+	upAndIn->setStrike(strike);
+	upAndIn->setBarrier(barrier);
+	option->setMaturity(maturity);
+	upAndOut->setMaturity(maturity);
+	upAndIn->setMaturity(maturity);
+
+	shared_ptr<Portfolio> portfolio
+		= Portfolio::newInstance();
+	portfolio->add(1, upAndOut);
+	portfolio->add(1, upAndIn);
+	portfolio->add(-1, option);
+
+	BlackScholesModel bsm;
+	bsm.setVolatility(0.1);
+	bsm.setStockPrice(100);
+	bsm.setRiskFreeRate(0);
+
+	double portfolioPrice = portfolio->price(bsm);
+
+	ASSERT_APPROX_EQUAL(0.0, portfolioPrice, 0.1);
+
+}
+
 
 void testPortfolio() {
     TEST( testSingleSecurity );
     TEST( testPutCallParity );
-    TEST( testKnockOutOptionsAndCallOptions );
+	TEST( testStocksAndBonds );
+	TEST( testBarrierOptions );
 }
 

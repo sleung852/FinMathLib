@@ -1,0 +1,40 @@
+<html>
+<head>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1.0', {'packages':['corechart']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+var data = google.visualization.arrayToDataTable([
+['x values','y values'],
+[0, 0.021385],
+[0.0210526, 0.0205423],
+[0.0421053, 0.0203758],
+[0.0631579, 0.0185099],
+[0.0842105, 0.0168872],
+[0.105263, 0.0146887],
+[0.126316, 0.0122621],
+[0.147368, 0.00930254],
+[0.168421, 0.00588141],
+[0.189474, 0.0019894],
+[0.210526, -0.0020474],
+[0.231579, -0.00639505],
+[0.252632, -0.0103716],
+[0.273684, -0.0149552],
+[0.294737, -0.0195027],
+[0.315789, -0.0249261],
+[0.336842, -0.0291706],
+[0.357895, -0.0354389],
+[0.378947, -0.0401983],
+[0.4, -0.044109]
+]);
+var options = {title: 'Change in Sigmas', 'width':800, 'height':800};
+var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+}
+</script>
+</head>
+<body>
+<div id='chart_div'>
+</body>
+</html>

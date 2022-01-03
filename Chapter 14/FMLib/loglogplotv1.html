@@ -1,0 +1,30 @@
+<html>
+<head>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1.0', {'packages':['corechart']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+var data = google.visualization.arrayToDataTable([
+['x values','y values'],
+[100, 0.000187099],
+[200, -1.86601e-05],
+[300, 0.000181678],
+[400, 0.000149731],
+[500, -1.29699e-05],
+[600, -0.000109158],
+[700, -8.52612e-05],
+[800, 8.63993e-05],
+[900, 3.77344e-05],
+[1000, 3.57676e-05]
+]);
+var options = {title: 'Log-Log Plot', 'width':800, 'height':800};
+var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+}
+</script>
+</head>
+<body>
+<div id='chart_div'>
+</body>
+</html>
