@@ -72,6 +72,19 @@ double differentiateNumerically( RealFunction& f,
 double integralFromInfinityToInfinity(RealFunction& f,
 							int nPoints);
 
+template <typename Function>
+double integral( Function& f, double a,
+                 double b, int nSteps ) {
+                        double h = (b-a)/nSteps;
+                        double x = a + 0.5*h;
+                        double total = 0.0;
+                        for (int i=0; i<nSteps; i++) {
+                            double y = f(x);
+                            total+=y;
+                            x+=h;
+                        }
+                        return h*total;
+}
 
 /**
  *  Test function

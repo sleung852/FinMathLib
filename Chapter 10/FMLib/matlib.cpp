@@ -577,6 +577,13 @@ static void testDifferentiateNumerically() {
     ASSERT_APPROX_EQUAL(differentiateNumerically(xs, 10), 20, 0.01);
 }
 
+// 17.3.3
+static void testTemplateIntegral() {
+    NormPDF normPDF;
+    double result = integral(normPDF, -1.96, 1.96, 1000);
+    ASSERT_APPROX_EQUAL(result, 0.95, 0.01);
+}
+
 
 void testMatlib() {
     TEST( testLinspace );
@@ -596,4 +603,5 @@ void testMatlib() {
     TEST ( testIntegralVersion3 );
     setDebugEnabled(false);
     TEST ( testDifferentiateNumerically );
+    TEST (testTemplateIntegral);
 }
