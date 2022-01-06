@@ -17,6 +17,7 @@ class Rectangle;
  */
 class Shape {
 public:
+    virtual ~Shape(){};
     /*  Does the point lie in the shape */
     virtual bool contains( const CartesianPoint& point )
         const = 0;

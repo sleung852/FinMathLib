@@ -27,7 +27,7 @@ public:
 		return false;
 	}
 
-	double price(const MultiStockModel& model) const {
+	double price(const MultiStockModel& model) const override {
 		MonteCarloPricer pricer;
 		return pricer.price(*this, model);
 	}

@@ -14,7 +14,7 @@
 #include "Portfolio.h"
 #include "Matrix.h"
 #include "Executor.h"
-#include "ThreadingExamples.h"
+#include "threadingexamples.h"
 #include "MargrabeOption.h"
 #include "RectangleRulePricer.h"
 
