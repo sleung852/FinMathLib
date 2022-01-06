@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Priceable.h"
 #include "ContinuousTimeOption.h"
+#include "MonteCarloPricer.h"
 
 /**
  *   A Portfolio contains options in various quantities
@@ -23,9 +24,9 @@ public:
     /*  Compute the current price */
     virtual double price( const MultiStockModel& model )
                               const = 0;
-    /*  Compute prices by grouping same maturity options together */
-    virtual double priceByMonteCarlo( const MultiStockModel& model ) const=0;
-
+	/*  Price this portfolio using one consistent set of monte carlo simulations */
+	virtual double monteCarloPrice(
+		const MultiStockModel& model, const MonteCarloPricer& pricer) const = 0;
     /*  Creates a Portfolio */
     static std::shared_ptr<Portfolio> newInstance();
 };

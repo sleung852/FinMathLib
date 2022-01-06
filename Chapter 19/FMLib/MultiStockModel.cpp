@@ -11,7 +11,7 @@ MultiStockModel::MultiStockModel(
 	const BlackScholesModel& bsm) {
 
 	int nStocks = 1;
-	stockToIndex[DEFAULT_STOCK] = 0;
+	stockCodeToIndex[DEFAULT_STOCK] = 0;
 	stockNames.push_back(DEFAULT_STOCK);
 
 	drifts = Matrix(nStocks, 1);
@@ -42,7 +42,7 @@ MultiStockModel::MultiStockModel(std::vector<std::string> stocks,
 	this->covarianceMatrix = covarianceMatrix;
 	int i = 0;
 	for (auto& s : stocks) {
-		stockToIndex[s] = i++;
+		stockCodeToIndex[s] = i++;
 	}
 }
 
@@ -53,15 +53,14 @@ MultiStockModel MultiStockModel::getSubmodel(
 	int n = stocks.size();
 	Matrix drifts(n, 1);
 	Matrix stockPrices(n, 1);
-	vector<string> newStocks(stocks.begin(),
-							 stocks.end());
+	vector<string> newStocks(stocks.begin(), stocks.end());
 	Matrix cov(n, n);
 
 	int newIndex = 0;
 	for (auto& stock : stocks) {
 		int idx = getIndex(stock);
 		drifts(newIndex) = this->drifts(idx);
-		stockPrices(newIndex) =this->stockPrices(idx);
+		stockPrices(newIndex) = this->stockPrices(idx);
 		newIndex++;
 	}
 
@@ -76,8 +75,7 @@ MultiStockModel MultiStockModel::getSubmodel(
 		}
 		i++;
 	}
-	MultiStockModel ret(newStocks, stockPrices,
-		                drifts, cov);
+	MultiStockModel ret(newStocks, stockPrices, drifts, cov);
 	ret.setDate(getDate());
 	ret.setRiskFreeRate(getRiskFreeRate());
 	return ret;
@@ -139,6 +137,7 @@ MarketSimulation MultiStockModel::generatePricePaths(
 	}
 
 	Matrix A = chol(covarianceMatrix);
+
 	
 	// create a matrix containing current log stock prices
 	// and a matrix contianing the drift term to add each
@@ -169,7 +168,7 @@ MarketSimulation MultiStockModel::generatePricePaths(
 	MarketSimulation sim;
 	for (int j = 0; j < nStocks; j++) {
 		auto stockPaths = simulations[j];
-		sim.addStockPaths(stockNames[j], stockPaths);
+		sim.addSimulation(stockNames[j], stockPaths);
 	}
 	return sim;
 }
@@ -205,11 +204,11 @@ static void testCorrectCovarianceMatrix() {
 
 	auto stocks = msm.getStocks();
 	for (int i = 0; i < (int)stocks.size(); i++) {
-		SPCMatrix m = sim.getStockPaths(stocks[i]);	
+		SPCMatrix m = sim.getStockPrices(stocks[i]);	
 		x.setCol(0, *m, nSteps - 1);
 		x.log();
 		for (int j = 0; j < (int)stocks.size(); j++) {
-			SPCMatrix n = sim.getStockPaths(stocks[j]);
+			SPCMatrix n = sim.getStockPrices(stocks[j]);
 			y.setCol(0, *n, nSteps - 1);
 			y.log();
 			x -= meanCols(x)(0,0);
