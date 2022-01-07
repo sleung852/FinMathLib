@@ -1,5 +1,6 @@
 #include "Executor.h"
 
+#include "Task.h"
 #include "stdafx.h"
 
 
@@ -29,6 +30,8 @@ public:
 	vector< thread* > threads;
 	/*  Weak pointer to the executor */
 	weak_ptr<ExecutorImpl> self;
+    /*  Add Functional Task */
+    void addFunctionalTask(std::function<void()> f);
 };
 
 /**
@@ -127,6 +130,21 @@ void ExecutorImpl::addTask( shared_ptr<Task> task ) {
     }
 }
 
+void ExecutorImpl::addFunctionalTask(std::function<void()> f) {
+    class FunctionalTask : public Task {
+        public:
+            FunctionalTask(std::function<void()> f) : func(f) {};
+            std::function<void()> func;
+
+            void execute() {
+                func();
+            }
+    };
+    // shared_ptr<FunctionalTask> fTask = make_shared<FunctionalTask>(f);
+    shared_ptr<FunctionalTask> fTask(new FunctionalTask(f));
+    addTask(fTask);
+}
+
 /**
  *   Wait until all threads have completed
  */
@@ -136,6 +154,8 @@ void ExecutorImpl::join() {
         cv.wait( lock );
     }
 }
+
+
 
 /**
  *  Returns an executor
@@ -168,7 +188,7 @@ static void test100Tasks() {
     };
 
     shared_ptr<Executor> executor = Executor::newInstance();
-    vector<shared_ptr<MyTask>> tasks;
+    vector<shared_ptr<MyTask> > tasks;
     int nTasks = 100;
     for (int i=0; i<nTasks; i++) {
         shared_ptr<MyTask> task = make_shared<MyTask>();
@@ -182,6 +202,16 @@ static void test100Tasks() {
     }
 }
 
+static void testFunctionalTask() {
+    shared_ptr<Executor> executor = Executor::newInstance();
+    auto sayHello = [](){cout << "Hello!\n";};
+    for (int i=0; i<3; i++) {
+        executor->addFunctionalTask(sayHello);
+    }
+    executor->join();
+}
+
 void testExecutor() {
     TEST( test100Tasks ); 
+    TEST( testFunctionalTask );
 }

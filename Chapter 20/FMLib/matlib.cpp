@@ -4,6 +4,9 @@
 #include "LineChart.h"
 #include "Histogram.h"
 #include "RealFunction.h"
+#include "testing.h"
+#include <memory>
+#include <random>
  
 
 using namespace std;
@@ -545,6 +548,132 @@ Matrix chol(const Matrix& A) {
 	return L;
 }
 
+double meanMultiThread(const std::vector<double>& vec, int threads) {
+	double output = 0;
+	int splitSize = vec.size()/threads;
+
+	class ComputeSumTask : public Task {
+		public:
+			double sum;
+			const std::vector<double>& vec;
+			int start;
+			int end;
+			void execute() {
+				for (int i=start; i<end; i++) {
+					sum += vec.at(i);
+				}
+			}
+
+			ComputeSumTask(const std::vector<double>& vec, int start, int end) :
+				vec(vec), start(start), end(end) {sum=0;};
+	};
+
+	std::vector<std::shared_ptr<ComputeSumTask> > tasks;
+
+	for (int i=0; i<threads-1; i++) {
+		tasks.push_back(std::make_shared<ComputeSumTask>(vec, i*splitSize, (i+1)*splitSize));
+	}
+	tasks.push_back(std::make_shared<ComputeSumTask>(vec, (threads-1)*splitSize, vec.size()));
+
+	std::shared_ptr<Executor> executor = Executor::newInstance();
+	for (int i=0; i<threads; i++) {
+		executor->addTask(tasks[i]);
+	}
+	executor->join();
+
+	for (int i=0; i<threads; i++) {
+		output += tasks[i]->sum;
+	}
+	return output/vec.size();
+}
+
+static bool isfinitenumber(double arg) {
+	return arg == arg &&
+		arg != std::numeric_limits<double>::infinity() &&
+		arg != -std::numeric_limits<double>::infinity();
+}
+
+double integrate2d(function<double(double, double)> f, int ai, int bi, int aj, int bj, int n) {
+    Matrix xi = randuniform(n,1) * (bi-ai) + ai;
+    Matrix xj = randuniform(n,1) * (bj-aj) + aj;
+    double output=0;
+
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            double result = f(xi(i), xj(j));
+            if (isfinitenumber(result)) {
+                output += result * (bi-ai) * (bj-aj) / (n*n);
+            }
+        }
+    }
+    stringstream ss;
+    ss << "Output=" << output << "\n";
+    DEBUG_PRINT(ss.str());
+    return output;
+}
+
+// double integrate2d(std::function<double(double, double)> f, int ai, int bi, int aj, int bj, int n) {
+//     Matrix xi = randuniform(n,1) * (bi-ai) + ai;
+//     Matrix xj = randuniform(n,1) * (bj-aj) + aj;
+//     double output=0;
+
+//     for (int i=0; i<n; i++) {
+//         double result = f(xi(i), xj(i));
+//         if (isfinitenumber(result)) {
+//             output += result * (bi-ai) * (bj-aj) / n;
+//         }
+//     }
+//     return output;
+// }
+
+double integrate2dMultithread(function<double(double, double)> f, int ai, int bi, int aj, int bj, int n, int threads) {
+    class Integral2DSingleThread : public Task {
+        public:
+            Integral2DSingleThread(function<double(double, double)> f, int threadIth, int threadSize, mt19937 rng,
+            int ai, int bi, int aj, int bj, int n) :
+                f(f), threadIth(threadIth), threadSize(threadSize), rng(rng), ai(ai), bi(bi), aj(aj), bj(bj), n(n) {
+                    localSum=0;
+            }
+            void execute() {
+                rng.discard(threadSize*threadIth);
+                Matrix xi = randuniform(rng, threadSize, 1) * (bi-ai) + ai;
+                Matrix xj = randuniform(rng, threadSize, 1) * (bj-aj) + aj;
+
+                for (int i=0; i<threadSize; i++) {
+                    double result = f(xi(i), xj(i));
+                    if (isfinitenumber(result)) {
+                        localSum += result * (bi-ai) * (bj-aj) / n;
+                    }
+                }
+            }
+            
+            function<double(double, double)> f;
+            int threadIth;
+            int threadSize;
+            mt19937 rng;
+            int ai;
+            int bi;
+            int aj;
+            int bj;
+            int n;
+            double localSum;
+    };
+    shared_ptr<Executor> executor = Executor::newInstance();
+    vector<shared_ptr<Integral2DSingleThread> > integralTasks;
+    int threadSize = n/threads;
+    for (int i=0; i<threads; i++) {
+        mt19937 rng;
+        shared_ptr<Integral2DSingleThread> integralThread = make_shared<Integral2DSingleThread>(f, i, threadSize, rng, ai, bi, aj, bj, n);
+        integralTasks.push_back(integralThread);
+        executor->addTask(integralTasks[i]);
+    }
+    executor->join();
+    double result = 0;
+    for (int i=0; i<threads; i++) {
+        result += integralTasks[i]->localSum;
+    }
+    return result;
+}
 
 ///////////////////////////////////////////////
 //
@@ -758,6 +887,61 @@ static void testChol() {
 	m.assertEquals( product, 0.001);
 }
 
+static void testMultiThreadMeanVec() {
+    vector<double> egVec(100);
+    for (int i=0; i<100; i++) {
+        egVec[i] = i*i + 3 * i + 4;
+    }
+    double actual = meanMultiThread(egVec, 4);
+
+    auto mean = [](vector<double> vec) {
+        double out = 0;
+        for (int i=0; i<vec.size(); i++) {
+            out += vec[i];
+        }
+        return out/vec.size();
+    };
+    double expect = mean(egVec);
+    // cout << "Actual: " << actual << endl;
+    // cout << "Expect: " << expect << endl;
+    ASSERT_APPROX_EQUAL(actual, expect, 0.01);
+}
+
+// static void testIntegrate2d() {
+//     auto sphere = [](double x, double y) {
+//         return sqrt(1 - x*x - y*y);
+//     };
+//     double actual = integrate2d(sphere, 0, 1, 0, 1, 10000);
+//     double expect = PI * 4 / 3 / 2;
+//     cout << "Actual: " << actual << endl;
+//     cout << "Expect: " << expect << endl;
+//     ASSERT_APPROX_EQUAL(actual, expect, 1);
+// }
+
+static void testIntegrate2d() {
+	// Rectangle rect(6.0, 2.0, 1.0, 3.0);
+	auto f = [](double x, double y) {
+		return sin(x) + cos(y);
+	};
+    double integral = integrate2d(f, 1.0, 3.0, 2.0, 6.0, 10000);
+	double expected = 2*((-1 + 4 * sin(1))*sin(2) + sin(6));
+    // cout << "Actual: " << integral << endl;
+    // cout << "Expect: " << expected << endl;
+	ASSERT_APPROX_EQUAL(integral, expected, 0.2);
+}
+
+static void testIntegrate2dv2() {
+	// Rectangle rect(6.0, 2.0, 1.0, 3.0);
+	auto f = [](double x, double y) {
+		return sin(x) + cos(y);
+	};
+    double integral = integrate2d(f, 1.0, 3.0, 2.0, 6.0, 10000);
+	double integralMultiThread = integrate2dMultithread(f, 1.0, 3.0, 2.0, 6.0, 10000, 4);
+    // cout << "integral: " << integral << endl;
+    // cout << "integralMultiThread: " << integralMultiThread << endl;
+	ASSERT_APPROX_EQUAL(integral, integralMultiThread, 0.1);
+}
+
 
 void testMatlib() {
     TEST( testLinspace );
@@ -781,4 +965,9 @@ void testMatlib() {
 	TEST( testTranspose );
 	TEST( testChol );
 	TEST(testIntegral3);
+    TEST (testMultiThreadMeanVec);
+    setDebugEnabled(true);
+    TEST (testIntegrate2d);
+    TEST (testIntegrate2dv2);
+    setDebugEnabled(false);
 }

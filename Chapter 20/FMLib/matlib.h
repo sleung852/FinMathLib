@@ -2,6 +2,9 @@
 
 #include "stdafx.h"
 #include "Matrix.h"
+#include "Task.h"
+#include "Executor.h"
+#include <memory>
 
 
 /*  Create a linearly spaced vector */
@@ -122,9 +125,17 @@ Matrix zeros( int rows, int cols );
  */
 Matrix ones( int rows, int cols );
 
+/*
+*    Compute vector mean with multi thread
+*/
 
+double meanMultiThread(const std::vector<double>& vec, int threads);
 
+/*
+*    2-D integration
+*/
 
+double integrate2d(std::function<double(double, double)> f, int ai, int bi, int aj, int bj, int n);
 
 /**
  *  Test function
