@@ -42,7 +42,9 @@ make clean all
 
 
 
+## Alternative
 
+An alternative python library is available at https://github.com/sleung852/pyquantfi
 
 
 
