@@ -1,12 +1,14 @@
 #pragma once
 
-#include "BarrierOption.h"
+#include "KnockoutOption.h"
 
-class UpAndInOption : public BarrierOption {
+class UpAndInOption : public KnockoutOption {
 public:
-	double payoff(
-		const std::vector<double>& prices) const;
+    Matrix payoff(
+        const Matrix& prices ) const;
 };
 
+typedef std::shared_ptr<UpAndInOption> SPUpAndInOption;
+typedef std::shared_ptr<const UpAndInOption> SPCUpAndInOption;
 
 void testUpAndInOption();

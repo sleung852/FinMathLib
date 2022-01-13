@@ -2,11 +2,12 @@
 #define D9564A88_972A_44D8_AF79_A40D3B371360
 
 #include "stdafx.h"
-#include "BarrierOption.h"
+#include "KnockoutOption.h"
 
-class DownAndInOption : public BarrierOption {
+class DownAndInOption : public KnockoutOption {
     public:
-        double payoff(const std::vector<double>& stockPrices) const;
+        Matrix payoff(
+            const Matrix& prices ) const;
 };
 
 #endif /* D9564A88_972A_44D8_AF79_A40D3B371360 */

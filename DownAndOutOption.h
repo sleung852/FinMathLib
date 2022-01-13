@@ -3,9 +3,9 @@
 #include "KnockoutOption.h"
 
 class DownAndOutOption : public KnockoutOption {
-public:
-    Matrix payoff(
-        const Matrix& prices ) const;
+    public:
+        Matrix payoff(
+            const Matrix& prices ) const;
 };
 
 

@@ -1,15 +1,15 @@
 #include "DownAndInOption.h"
+#include "matlib.h"
 
-double DownAndInOption::payoff(const std::vector<double> &stockPrices) const {
-    bool flag = false;
-    for (size_t i=0; i<stockPrices.size(); i++) {
-        if (stockPrices.at(i) <= getBarrier()) {
-            flag = true;
-            break;
-        }
-    }
-    if (flag && stockPrices.back() < getStrike()) {
-        return getStrike() - stockPrices.back();
-    }
-    return 0.0;
+using namespace std;
+
+Matrix DownAndInOption::payoff(
+        const Matrix& prices ) const {
+    Matrix min = minOverRows( prices );
+    Matrix didHit = min < getBarrier();
+    Matrix p = prices.col( prices.nCols()-1);
+    p -= getStrike();
+    p.positivePart();
+    p.times(didHit);
+    return p;
 }
