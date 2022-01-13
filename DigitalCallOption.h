@@ -3,15 +3,9 @@
 #include "PathIndependentOption.h"
 
 class DigitalCallOption : public PathIndependentOption {
+	public:
 
-	double payoff(double stockAtMaturity) const {
-		if (stockAtMaturity > getStrike()) {
-			return 1.0;
-		}
-		else {
-			return 0.0;
-		}
-	}
+    Matrix payoffAtMaturity( const Matrix& stockAtMaturity ) const;
 
 };
 

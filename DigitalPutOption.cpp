@@ -4,6 +4,11 @@
 #include "matlib.h"
 
 
+Matrix DigitalPutOption::payoffAtMaturity( const Matrix& stockAtMaturity ) const {
+    Matrix val = stockAtMaturity - getStrike();
+    return val < getStrike();
+}
+
 static void testMonteCarloPrice() {
 	rng("default");
 	DigitalPutOption option;

@@ -3,6 +3,11 @@
 #include "MonteCarloPricer.h"
 #include "matlib.h"
 
+Matrix DigitalCallOption::payoffAtMaturity( const Matrix& stockAtMaturity ) const {
+    Matrix val = stockAtMaturity - getStrike();
+    return val > getStrike();
+}
+
 
 static void testMonteCarloPrice() {
 	rng("default");
