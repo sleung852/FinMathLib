@@ -6,6 +6,7 @@
 
 class StockOnlyStrategy : public Strategy {
     public:
+        Matrix selectStockQuantity(double date, Matrix assetPrice);
         double selectStockQuantity(double date, double assetPrice);
         double chooseCharge(double assetPrice,  std::shared_ptr<ContinuousTimeOptionBase> option);
 

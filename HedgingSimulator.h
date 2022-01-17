@@ -1,7 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
-#include "StockPriceModel.h"
+// #include "StockPriceModel.h"
+#include "BlackScholesModel.h"
 #include "ContinuousTimeOptionBase.h"
 #include "Strategy.h"
 
@@ -23,13 +24,9 @@ public:
 		this->toHedge = toHedge;
 	}
 	void setSimulationModel(
-		std::shared_ptr<StockPriceModel> model) {
+		std::shared_ptr<BlackScholesModel> model) {
 		this->simulationModel = model;
 	}
-	// void setPricingModel(
-	// 	std::shared_ptr<StockPriceModel> model) {
-	// 	this->pricingModel = model;
-	// }
 	void setNSteps(int nSteps) {
 		this->nSteps = nSteps;
 	}
@@ -43,10 +40,10 @@ public:
 
 	/*  Another constructor */
 	HedgingSimulator(std::shared_ptr<ContinuousTimeOptionBase> option,
-					 std::shared_ptr<StockPriceModel> model,
+					 std::shared_ptr<BlackScholesModel> model,
 					 std::shared_ptr<Strategy> strategy);
 	HedgingSimulator(std::shared_ptr<ContinuousTimeOptionBase> option,
-					 std::shared_ptr<StockPriceModel> model);
+					 std::shared_ptr<BlackScholesModel> model);
 	/*  Default constructor */
 	HedgingSimulator(std::shared_ptr<ContinuousTimeOptionBase> option);
 
@@ -54,7 +51,7 @@ private:
 	/*  The option that has been written */
 	std::shared_ptr<ContinuousTimeOptionBase> toHedge;
 	/*  The model used to simulate stock prices */
-	std::shared_ptr<StockPriceModel>
+	std::shared_ptr<BlackScholesModel>
 		simulationModel;
 	/* The model used to compute prices and deltas */
 	// std::shared_ptr<StockPriceModel> pricingModel;
@@ -74,7 +71,7 @@ private:
 	// 	double date,
 	// 	double stockPrice ) const;
 	/* Accounts price difference in bid ask spread */
-	double computePrice( bool buy, double stockPrice) const;
+	Matrix computePrice( Matrix buyBool, Matrix stockPrice) const;
 };
 
 //

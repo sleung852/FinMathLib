@@ -698,6 +698,29 @@ double bisectionRecursion(function<double(double)> f,
                     return bisectionRecursion(f, a, b, y, threshold);
                 }
 
+/**
+ *  Convenience method for generating plots
+ */
+void plot( const string& file,
+           const vector<double>& x, 
+           const vector<double>& y ) {
+    LineChart lc;
+    lc.setSeries(x,y);
+    lc.writeAsHTML( file );
+}
+
+/**
+ *  Convenience method for generating plots
+ */
+void hist( const string& file,
+           const vector<double>& data, 
+           int numBuckets ) {
+    Histogram h;
+    h.setData(data);
+	h.setNumBuckets(numBuckets);
+    h.writeAsHTML( file );
+}
+
 ///////////////////////////////////////////////
 //
 //   TESTS

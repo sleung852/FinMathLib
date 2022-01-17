@@ -6,6 +6,7 @@
 
 class DeltaHedgingStrategy : public Strategy {
     public:
+        Matrix selectStockQuantity(double date, Matrix assetPrices);
         double selectStockQuantity(double date, double assetPrice);
         // double chooseCharge(double assetPrice,  std::shared_ptr<ContinuousTimeOptionBase> option);
 

@@ -7,6 +7,7 @@
 class BondsOnlyStrategy : public Strategy {
     public:
         double selectStockQuantity(double date, double assetPrice);
+        Matrix selectStockQuantity(double date, Matrix assetPrice);
 };
 
 

@@ -49,6 +49,7 @@ public:
      *  for general use, but is handy for tests.
      */
     virtual double price( const MultiStockModel& model ) const;
+	virtual double delta( const BlackScholesModel& model ) const;
 
 	/**
 	*  Compute the payoff given the prices for the stock

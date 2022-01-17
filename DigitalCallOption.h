@@ -4,8 +4,7 @@
 
 class DigitalCallOption : public PathIndependentOption {
 	public:
-
-    Matrix payoffAtMaturity( const Matrix& stockAtMaturity ) const;
+		Matrix payoffAtMaturity( const Matrix& stockAtMaturity ) const;
 
 };
 

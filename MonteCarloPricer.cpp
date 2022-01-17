@@ -22,6 +22,21 @@ double MonteCarloPricer::price(
 	return price(option, msm);
 }
 
+double MonteCarloPricer::delta(
+	const ContinuousTimeOption& option,
+	const BlackScholesModel& model,
+	double h) const {
+	auto stocks = option.getStocks();
+	assert(stocks.size() == 1);
+	BlackScholesModel model1(model);
+	BlackScholesModel model2(model);
+	model1.stockPrice = model1.stockPrice - h;
+	model2.stockPrice = model2.stockPrice + h;
+	MultiStockModel msm1(model1);
+	MultiStockModel msm2(model2);
+	return (price(option, msm2) - price(option, msm1))/(2*h);
+}
+
 double singleThreadedPrice(
 		int taskNumber,
 		int nScenarios,

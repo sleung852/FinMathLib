@@ -153,6 +153,17 @@ double bisectionRecursion(std::function<double(double)> f,
                 double threshold);
 
 
+/*  Plot a histogram */
+void hist( const std::string& fileName,
+           const std::vector<double>& values,
+           int numBuckets=10);
+
+/*  Create a line chart */
+void plot( const std::string& fileName,
+           const std::vector<double>& x,
+           const std::vector<double>& y);
+
+
 /**
  *  Test function
  */

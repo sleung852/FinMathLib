@@ -14,7 +14,6 @@
 #include "Portfolio.h"
 #include "Matrix.h"
 #include "Executor.h"
-#include "threadingexamples.h"
 #include "MargrabeOption.h"
 #include "RectangleRulePricer.h"
 #include "ImpliedVolatility.h"
@@ -42,7 +41,6 @@ int main() {
     testPortfolio();
     testPutOption();
 	testExecutor();
-	testThreadingExamples();
 	testUpAndOutOption();
 	testMargrabeOption();
 	testRectangleRulePricer();

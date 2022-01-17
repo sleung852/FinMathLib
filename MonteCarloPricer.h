@@ -17,6 +17,9 @@ public:
     /*  Price a path dependent option */
     double price( const ContinuousTimeOption& option,
                   const BlackScholesModel& model ) const;
+    double delta( const ContinuousTimeOption& option,
+                  const BlackScholesModel& model,
+                  double h=1e-5) const;
 	/*  Price a path dependent option */
 	double price(const ContinuousTimeOption& option,
 		const MultiStockModel& model) const;

@@ -10,6 +10,11 @@ double ContinuousTimeOptionBase::price( const MultiStockModel& model ) const {
     return pricer.price( *this, model );
 }
 
+double ContinuousTimeOptionBase::delta( const BlackScholesModel& model ) const {
+    MonteCarloPricer pricer;
+    return pricer.delta( *this, model );
+}
+
 //////////////////////////////
 //
 //  Tests
