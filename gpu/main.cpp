@@ -58,7 +58,7 @@ int main() {
     double T = 3; // no of years
     double K = 100; // strike price
     int n = 50; // no of step (num of time)
-    int m = 1000000; // no of path (num of simulations)
+    int m = 10000000; // no of path (num of simulations)
 
     try {
         double* Zs = new double[n*m]; // declare a quasi random variables array
